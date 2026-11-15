@@ -1,0 +1,38 @@
+{% extends "game/base.html" %}
+{% block title %}NASA data &amp; science{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Where the science comes from</h1>
+  <p>The numbers in the game are <strong>scaled to be playable</strong>, but they are anchored to real NASA science.
+  We label every data source so you can check it.</p>
+  <ul class="sources">
+    {% for d in datasets %}
+    <li><a href="{{ d.url }}" target="_blank" rel="noopener">{{ d.name }}</a> — {{ d.use }}</li>
+    {% endfor %}
+  </ul>
+  <h2>Radiation facts</h2>
+  <p>{{ facts.moon_radiation }}</p>
+  <p>{{ facts.mars_radiation }}</p>
+  <h2>Archived storms (static, not live)</h2>
+  {% for key, a in archives.items %}
+    <h3>{{ a.title }}</h3>
+    <ul>{% for e in a.events %}<li>{{ e.date }} — {{ e.label }}</li>{% endfor %}</ul>
+  {% endfor %}
+  <h2>What is simplified?</h2>
+  <ul>
+    <li>Game turns are time-compressed (about 2 Earth days per Moon turn).</li>
+    <li>"Storm shield" stands in for real shelters like water walls and moving into a shielded room.</li>
+    <li>The radiation "safety line" is a game limit, not an official medical limit.</li>
+    <li>The OSDR dataset is listed as background reading but is not yet used in the simulation.</li>
+  </ul>
+  <h2>Glossary: every word explained</h2>
+  <p>Our helpers explain these when you hover in the game. Here they are all in one place, which is handy for classrooms and printing.</p>
+  <dl class="glossary">
+    {% for key, t in guide_data.tips.items %}
+    <dt>{{ t.title }}</dt>
+    <dd>{{ t.say }} <em>{{ t.like }}</em></dd>
+    {% endfor %}
+  </dl>
+  <a class="btn" href="{% url 'home' %}">Back to the game</a>
+</section>
+{% endblock %}

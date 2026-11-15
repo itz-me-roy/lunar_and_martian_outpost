@@ -1,0 +1,64 @@
+{% extends "game/base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Run a space outpost!</h1>
+  <p class="lead">Welcome to your <span class="term" tabindex="0" data-tip="outpost">outpost</span>! Your <span class="term" tabindex="0" data-tip="crew">crew</span> of 4 needs air, food and safety from <span class="term" tabindex="0" data-tip="storm">space storms</span>. You have a little <span class="term" tabindex="0" data-tip="power">power</span>
+  each turn. <strong>Every choice costs something.</strong> Can you keep everyone safe for 15 turns
+  <em>and</em> do great science?</p>
+</section>
+
+<form method="post" class="card">
+  {% csrf_token %}
+  <h2>1. Pick your world</h2>
+  <div class="choices">
+    {% for key, s in sites.items %}
+    <label class="choice" data-tip="site_{{ key }}">
+      <input type="radio" name="site" value="{{ key }}" {% if forloop.first %}checked{% endif %}>
+      <span class="choice-body"><span class="big">{{ s.emoji }} {{ s.name }}</span>
+        <!-- <span>{{ s.blurb }}</span><small>{{ s.turn_is }}</small></span> -->
+    </label>
+    {% endfor %}
+  </div>
+
+  <h2>2. Pick your space weather</h2>
+  <div class="choices">
+    <label class="choice" data-tip="live">
+      <input type="radio" name="mode" value="live" checked>
+      <span class="choice-body"><span class="big">📡 Today's real Sun   <br><small>Non Archive (Live)</small></span>
+        <!-- <span>Uses real <span class="term" tabindex="0" data-tip="flare">flares</span> and solar clouds from NASA's <span class="term" tabindex="0" data-tip="donki">DONKI</span> database for the last 30 days.
+        If NASA can't be reached, we tell you and use an archive instead.</span></span> -->
+    </label>
+    {% for key, a in archives.items %}
+    <label class="choice" data-tip="live">
+      <input type="radio" name="mode" value="{{ key }}">
+        <span class="choice-body"><span class="big">🗂️ {{ a.title }}</span>
+        <!-- <span>{{ a.blurb }}</span> -->
+        <small>Archived (not live)</small></span>
+    </label>
+    {% endfor %}
+  </div>
+
+  <button class="btn" type="submit">Launch mission</button>
+  {% if has_game %}<a class="btn ghost" href="{% url 'play' %}">Continue last mission</a>{% endif %}
+</form>
+
+<section class="card">
+  <h2>How to play</h2>
+  <ol class="how">
+    <li><strong>Share your power.</strong> Turn the dials on the Air machine, Greenhouse, Storm shield and Science lab.</li>
+    <li><strong>No free choices.</strong> Power spent on science can't protect the crew from a storm.</li>
+    <li><strong>Listen to Earth</strong> <span class="term" tabindex="0" data-tip="radio">(costs power)</span> to get storm warnings. Flares give no warning at all!</li>
+    <li>Keep the <span class="term" tabindex="0" data-tip="radiation">radiation</span> meter under the line, and the air and food above zero.</li>
+  </ol>
+</section>
+
+<section class="card">
+  <h2>Meet your helpers</h2>
+  <p>Hover over anything with a dotted line (or tap it on a tablet) and one of us will explain it in plain words.</p>
+  <div class="cast">
+    <span class="who" data-tip="nova" tabindex="0"><span class="av" data-av="nova"></span><span><b>Nova</b><small>Your guide</small></span></span>
+    <span class="who" data-tip="beep" tabindex="0"><span class="av" data-av="beep"></span><span><b>Beep</b><small>Robot engineer</small></span></span>
+    <span class="who" data-tip="sunny" tabindex="0"><span class="av" data-av="sunny"></span><span><b>Sunny</b><small>The Sun</small></span></span>
+  </div>
+</section>
+{% endblock %}

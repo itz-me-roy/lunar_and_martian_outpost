@@ -1,0 +1,38 @@
+{% extends "game/base.html" %}
+{% block title %}Mission debrief{% endblock %}
+{% block content %}
+<section class="card center">
+  <h1>{{ title }}</h1>
+  <p class="lead">{{ text }}</p>
+  <p class="rankline term" tabindex="0" data-tip="rank">Rank: {{ rank }}</p>
+  <div class="stars" data-tip="stars" tabindex="0" aria-label="{{ stars }} out of 3 stars">
+    {% for i in star_range %}{% if forloop.counter <= stars %}⭐{% else %}☆{% endif %}{% endfor %}
+  </div>
+  <p>⭐ Survive · ⭐ {{ goal }}+ science points · ⭐ keep radiation under {{ star_dose }} mSv</p>
+  <div class="stats">
+    <div data-tip="science_pts" tabindex="0"><b>{{ state.science }}</b><span>science points</span></div>
+    <div data-tip="dose" tabindex="0"><b>{{ state.dose }}</b><span>mSv radiation (line: {{ budget }})</span></div>
+    <div><b>{{ history|length }}</b><span>turns played</span></div>
+  </div>
+  <p class="source">Space weather used: {{ state.source }}</p>
+</section>
+
+<section class="card">
+  <h2>What you learned</h2>
+  <ul class="lessons">{% for l in lessons %}<li>{{ l }}</li>{% endfor %}</ul>
+</section>
+
+<section class="card">
+  <h2>Your mission log</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Turn</th><th>Air</th><th>Food</th><th>Shield</th><th>Science</th><th>Radio</th><th>Air left</th><th>Food left</th><th>Battery</th><th>Dose</th><th>Storms</th></tr>
+    {% for h in history %}
+    <tr><td>{{ h.turn }}</td><td>{{ h.alloc.air }}</td><td>{{ h.alloc.food }}</td><td>{{ h.alloc.shield }}</td>
+      <td>{{ h.alloc.science }}</td><td>{% if h.alloc.radio %}📡{% endif %}</td>
+      <td>{{ h.o2 }}</td><td>{{ h.food }}</td><td>{{ h.battery }}</td><td>{{ h.dose }}</td>
+      <td>{% for e in h.events %}☀️ {{ e.label }}{% if not forloop.last %}, {% endif %}{% endfor %}</td></tr>
+    {% endfor %}
+  </table></div>
+  <a class="btn" href="{% url 'home' %}">Play again with a new plan</a>
+</section>
+{% endblock %}

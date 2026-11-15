@@ -1,0 +1,21 @@
+{% extends "game/base.html" %}
+{% block content %}
+{% include "game/nova_say.html" with say="Each and every content given is a real NASA data fact for you, "|add:name|add:"! 💌" %}
+<div class="grid3">
+    {% for c in cards %}
+        <div class="flip" tabindex="0">
+            <div class="flipin">
+                <div class="face front">
+                    <span>{{ c.0 }}</span>
+                    <h3>{{ c.1 }}</h3>
+                    <em>Hover or tap to flip me</em>
+                </div>
+                <div class="face back">
+                    <p>{{ c.2 }}</p>
+                    <small>Source: {{ c.3 }}</small>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

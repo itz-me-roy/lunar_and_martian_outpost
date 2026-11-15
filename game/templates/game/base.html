@@ -1,0 +1,23 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Outpost Zero{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'game/style.css' %}">
+  <link rel="icon" type="image/x-icon" href="{% static 'icon/favicon_transparent.png' %}">
+</head>
+<body data-nova="{% static 'game/nova.jpg' %}">
+    <header class="top">
+      <a class="brand" href="{% url 'home' %}">🚀 Outpost Zero</a>
+      <nav><a href="{% url 'about' %}">NASA data &amp; science</a></nav>
+    </header>
+    <nav class="top">
+      <span><a href="{% url 'cards' %}">Cards</a></span>
+    </nav>
+    <main>{% block content %}{% endblock %}</main>
+    <footer>Built with real NASA open data. Not an official NASA product.</footer>
+    {{ guide_data|json_script:"guide-data" }}
+    <script src="{% static 'game/guide.js' %}"></script>
+</body>
+</html>

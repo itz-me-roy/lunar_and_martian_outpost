@@ -1,0 +1,16 @@
+{% extends "game/base.html" %}{% load static %}
+{% block content %}
+<section class="hero">
+    <div class="nova-row bigw">
+        <img class="nova" src="{% static 'game/nova.png' %}" alt="Nova">
+        <div class="bubble">Psst... Hi! I'm <b>Nova</b>! 🌟 Somewhere out there, a Moon base needs a brave commander. Want to see how astronauts really stay alive up there?
+        <form method="post" class="namebox">
+            {% csrf_token %}
+            <label for="n">What's your name, future commander?</label>
+            <input id="n" name="name" maxlength="15" placeholder="Type your name" autofocus>
+            <button class="btnl">Launch me! 🚀</button>
+        </form>
+    </div>
+</section>
+<h2 class="center">Real NASA surprises are waiting for you</h2>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "game/base.html" %}
+{% block title %}Turn {{ state.turn }} - Outpost Zero{% endblock %}
+{% block content %}
+<section class="status card">
+  <div class="turnline"><strong class="term" tabindex="0" data-tip="site_{{ state.site }}">{{ site.emoji }} {{ site.name }}</strong>
+    <span class="term" tabindex="0" data-tip="{% if state.site == 'mars' %}sol{% else %}turn{% endif %}">Turn {{ state.turn }} of {{ turns }}</span></div>
+  <div class="meters">
+    <div class="meter" tabindex="0" data-tip="oxygen"><label>🫁 Air</label><div class="bar"><i class="meter-fill" data-value="{{ state.o2 }}" data-max="20"></i></div><b>{{ state.o2 }}</b></div>
+    <div class="meter" tabindex="0" data-tip="food_meter"><label>🌱 Food</label><div class="bar"><i class="meter-fill" data-value="{{ state.food }}" data-max="20"></i></div><b>{{ state.food }}</b></div>
+    <div class="meter" tabindex="0" data-tip="battery"><label>🔋 Battery</label><div class="bar"><i class="meter-fill" data-value="{{ state.battery }}" data-max="20"></i></div><b>{{ state.battery }}</b></div>
+    <div class="meter rad" tabindex="0" data-tip="dose"><label>☢️ Radiation</label><div class="bar"><i class="meter-fill" data-value="{{ state.dose }}" data-max="{{ budget }}"></i></div><b>{{ state.dose }} / {{ budget }} <span class="term" data-tip="msv">mSv</span></b></div>
+  </div>
+  <div class="sunline">☀️ <span class="term" tabindex="0" data-tip="sun_power">Sunlight power</span> this turn: <b>{{ gen }}</b>
+    {% if dust %}<span class="term" tabindex="0" data-tip="dust_storm">🌪️ (dust storm is blocking the Sun!)</span>{% elif state.site == 'moon' and gen < 5 %}<span class="term" tabindex="0" data-tip="lunar_night">🌑 (it's lunar night)</span>{% endif %}
+    · 🔬 <span class="term" tabindex="0" data-tip="science_pts">Science</span>: <b>{{ state.science }}</b> · <span class="term" tabindex="0" data-tip="delay">{{ site.radio }}</span>{{ site.delay_text }}</div>
+</section>
+
+{% for w in warnings %}
+<div class="alert warn">📡 <strong class="term" tabindex="0" data-tip="radio">Message from Earth:</strong> {{ w.label }} expected THIS turn! {{ w.detail }}</div>
+{% endfor %}
+{% for level, text in report %}
+<div class="alert {{ level }}">{{ text }}</div>
+{% endfor %}
+{% if error %}<div class="alert bad">⚠️ {{ error }}</div>{% endif %}
+
+<form method="post" class="card" id="plan">
+  {% csrf_token %}
+  <h2>Share your <span class="term" tabindex="0" data-tip="budget">power</span></h2>
+  <p class="powerline"><span class="term" tabindex="0" data-tip="power">Power</span> available: <b>{{ consts.gen|add:consts.battery }}</b>
+    (sun {{ gen }} + battery {{ state.battery }}) · Using: <b id="spend">0</b> · Left over charges the battery.</p>
+  {% for s in systems %}
+  <fieldset class="system" data-tip="{{ s.key }}">
+    <legend>{{ s.emoji }} {{ s.name }}</legend>
+    <p class="help">{{ s.help }}</p>
+    <div class="levels">
+      {% for lv in levels %}
+      <label class="lvl" data-tip="level"><input type="radio" name="{{ s.key }}" value="{{ lv }}"
+        {% if s.key == 'air' and chosen.air == lv %}checked{% endif %}
+        {% if s.key == 'food' and chosen.food == lv %}checked{% endif %}
+        {% if s.key == 'shield' and chosen.shield == lv %}checked{% endif %}
+        {% if s.key == 'science' and chosen.science == lv %}checked{% endif %}>
+        <span><b>{{ lv }}⚡</b><small>{% for t in s.levels %}{% if forloop.counter0 == lv %}{{ t }}{% endif %}{% endfor %}</small></span></label>
+      {% endfor %}
+    </div>
+  </fieldset>
+  {% endfor %}
+  <fieldset class="system" data-tip="radio">
+    <legend>📡 Radio to Earth</legend>
+    <p class="help">Listen for storm warnings. Costs 1⚡.
+      {% if radio_need == 1 %}Keep it on one turn and Earth's warning arrives for the next turn.
+      {% else %}Mars messages are slow: keep it on for {{ radio_need }} turns in a row to get a warning in time.{% endif %}
+      Solar flares can't be warned about.</p>
+    <label class="switch"><input type="checkbox" name="radio" value="1" {% if chosen.radio %}checked{% endif %}> Listen to Earth (1⚡)</label>
+  </fieldset>
+
+  <div class="preview card inner">
+    <h3>If nothing surprising happens…</h3>
+    <p>🫁 Air: <b id="pv-o2">?</b> · 🌱 Food: <b id="pv-food">?</b> · 🔋 Battery: <b id="pv-bat">?</b></p>
+    <p class="hint" id="pv-warn"></p>
+  </div>
+  <button class="btn" type="submit">Start turn {{ state.turn }}</button>
+</form>
+
+{{ consts|json_script:"consts" }}
+<script>
+(function () {
+  var C = JSON.parse(document.getElementById('consts').textContent);
+  var form = document.getElementById('plan');
+  function val(n) { var e = form.querySelector('input[name="' + n + '"]:checked'); return e ? parseInt(e.value, 10) : 0; }
+  function clamp(x, hi) { return Math.min(hi, x); }
+  function setBarWidths() {
+      document.querySelectorAll('.meter-fill').forEach(function (el) {
+        var value = Number(el.dataset.value || 0);
+        var max = Number(el.dataset.max || 100);
+        var percent = max > 0 ? Math.round((value / max) * 100) : 0;
+        el.style.width = Math.min(Math.max(percent, 0), 100) + '%';
+      });
+    } 
+  function update() {
+    var air = val('air'), food = val('food'), sh = val('shield'), sci = val('science');
+    var radio = form.querySelector('input[name="radio"]').checked ? C.radioCost : 0;
+    var spend = air + food + sh + sci + radio;
+    var made = C.airProd[air] + (food >= 2 ? C.plantBonus : 0);
+    document.getElementById('spend').textContent = spend + ' / ' + (C.gen + C.battery);
+    document.getElementById('pv-o2').textContent = clamp(C.o2 + made - C.use, C.tankCap);
+    document.getElementById('pv-food').textContent = clamp(C.food + C.foodProd[food] - C.use, C.tankCap);
+    document.getElementById('pv-bat').textContent = clamp(C.battery + C.gen - spend, C.batteryCap);
+    var w = [];
+    if (spend > C.gen + C.battery) w.push('Not enough power! Turn something down.');
+    if (C.o2 + made - C.use < 0) w.push('Air would run out!');
+    document.getElementById('pv-warn').textContent = w.join(' ');
+    setBarWidths();
+  }
+  form.addEventListener('change', update); update();
+})();
+</script>
+{% endblock %}
