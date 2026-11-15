@@ -1,6 +1,10 @@
 # Outpost Zero - run a Moon or Mars outpost (Django)
 
-A browser game for ages 7-12. Share a small power budget between Air, Greenhouse,
+Lunar and Martian Outpost Game is a browser-based Junior Astronaut Mission Trainer
+for ages 7-12. It introduces outposts, radiation, and the challenges astronauts
+face, using real NASA data and APIs.
+
+Share a small power budget between Air, Greenhouse,
 Storm shield, Science and the Radio. Nothing is free: power spent on science can't
 protect the crew from a solar storm.
 
