@@ -2,14 +2,14 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "builds": [
     {
-      "src": "outpost/wsgi.py",
+      "src": "outpost_project/wsgi.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "outpost/wsgi.py"
+      "dest": "outpost_project/wsgi.py"
     }
   ]
 }
