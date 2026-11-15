@@ -1,4 +1,4 @@
-# Outpost Zero - run a Moon or Mars outpost (Django)
+# LUNAR and MARTIAN Outpost Game
 
 Lunar and Martian Outpost Game is a browser-based Junior Astronaut Mission Trainer
 for ages 7-12. It introduces outposts, radiation, and the challenges astronauts
